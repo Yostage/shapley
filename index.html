@@ -14,6 +14,11 @@
                 <input type="number" id="seed" value="12345" min="0">
             </div>
             <div class="control-group">
+                <label for="width">Width:</label>
+                <input type="range" id="width" min="4" max="10" value="6">
+                <span id="width-value">6</span>
+            </div>
+            <div class="control-group">
                 <label for="iterations">Iterations:</label>
                 <input type="range" id="iterations" min="10" max="500" value="30">
                 <span id="iterations-value">30</span>
@@ -39,6 +44,11 @@
                     <p>Height: <span id="current-height">0</span></p>
                     <p>Iteration: <span id="current-iteration">0</span> / <span id="total-iterations">0</span></p>
                     <p>Current Piece: <span id="current-piece">-</span></p>
+                </div>
+                <div class="verification-info">
+                    <p>Board Height: <span id="board-height">0</span></p>
+                    <p>Σ Shapley: <span id="sum-shapley">0</span></p>
+                    <p>Σ Marginal: <span id="sum-marginal">0</span></p>
                 </div>
             </section>
 

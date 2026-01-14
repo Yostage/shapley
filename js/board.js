@@ -194,9 +194,9 @@ class Board {
     }
 
     // Generate a mostly-filled board
-    static generate(seed, fillRatio = 0.7) {
+    static generate(seed, width = 10, fillRatio = 0.7) {
         const rand = mulberry32(seed);
-        const board = new Board();
+        const board = new Board(width, 20);
 
         // Try to fill the board from bottom up
         let attempts = 0;

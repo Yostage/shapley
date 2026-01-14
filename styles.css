@@ -54,6 +54,7 @@ body {
     width: 150px;
 }
 
+#width-value,
 #iterations-value,
 #speed-value {
     min-width: 40px;
@@ -134,19 +135,27 @@ h2 {
     display: block;
 }
 
-.simulation-info {
+.simulation-info,
+.verification-info {
     margin-top: 15px;
     font-size: 14px;
     color: #aaa;
 }
 
-.simulation-info p {
+.simulation-info p,
+.verification-info p {
     margin: 5px 0;
 }
 
-.simulation-info span {
+.simulation-info span,
+.verification-info span {
     color: #fff;
     font-weight: bold;
+}
+
+.verification-info {
+    border-top: 1px solid #333;
+    padding-top: 10px;
 }
 
 #shapley-canvas {

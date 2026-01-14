@@ -2,6 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // DOM elements
     const seedInput = document.getElementById('seed');
+    const widthSlider = document.getElementById('width');
+    const widthValue = document.getElementById('width-value');
     const iterationsSlider = document.getElementById('iterations');
     const iterationsValue = document.getElementById('iterations-value');
     const resetBtn = document.getElementById('reset-btn');
@@ -16,6 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentIterationEl = document.getElementById('current-iteration');
     const totalIterationsEl = document.getElementById('total-iterations');
     const currentPieceEl = document.getElementById('current-piece');
+
+    const boardHeightEl = document.getElementById('board-height');
+    const sumShapleyEl = document.getElementById('sum-shapley');
+    const sumMarginalEl = document.getElementById('sum-marginal');
 
     const boardCanvas = document.getElementById('board-canvas');
     const shapleyCanvas = document.getElementById('shapley-canvas');
@@ -40,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (params.has('seed')) {
             seedInput.value = params.get('seed');
         }
+        if (params.has('width')) {
+            widthSlider.value = params.get('width');
+            widthValue.textContent = params.get('width');
+        }
         if (params.has('iterations')) {
             iterationsSlider.value = params.get('iterations');
             iterationsValue.textContent = params.get('iterations');
@@ -53,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateURL() {
         const params = new URLSearchParams();
         params.set('seed', seedInput.value);
+        params.set('width', widthSlider.value);
         params.set('iterations', iterationsSlider.value);
         params.set('delay', speedSlider.value);
         const newURL = `${window.location.pathname}?${params.toString()}`;
@@ -61,6 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load initial state from URL
     loadFromURL();
+
+    // Update width display and URL
+    widthSlider.addEventListener('input', () => {
+        widthValue.textContent = widthSlider.value;
+        updateURL();
+    });
 
     // Update iterations display and URL
     iterationsSlider.addEventListener('input', () => {
@@ -80,8 +97,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Generate board
     function generateBoard() {
         const seed = parseInt(seedInput.value) || 12345;
-        board = Board.generate(seed);
+        const width = parseInt(widthSlider.value) || 6;
+        board = Board.generate(seed, width);
         originalBoard = board.clone();
+
+        // Update canvas sizes based on board dimensions
+        const cellSize = 30;
+        const canvasWidth = width * cellSize;
+        const canvasHeight = 20 * cellSize;
+        boardCanvas.width = canvasWidth;
+        boardCanvas.height = canvasHeight;
+        shapleyCanvas.width = canvasWidth;
+        shapleyCanvas.height = canvasHeight;
+        marginalCanvas.width = canvasWidth;
+        marginalCanvas.height = canvasHeight;
 
         // Calculate marginal contributions (static, once per board)
         marginalContributions = originalBoard.calculateMarginalContributions();
@@ -103,6 +132,28 @@ document.addEventListener('DOMContentLoaded', () => {
         marginalRenderer.render(originalBoard, marginalContributions);
     }
 
+    // Update verification display
+    function updateVerification(shapleyContributions) {
+        const height = originalBoard ? originalBoard.getHeight() : 0;
+        boardHeightEl.textContent = height;
+
+        // Sum of Shapley values
+        let sumShapley = 0;
+        if (shapleyContributions) {
+            for (const value of shapleyContributions.values()) {
+                sumShapley += value;
+            }
+        }
+        sumShapleyEl.textContent = sumShapley.toFixed(2);
+
+        // Sum of marginal values
+        let sumMarginal = 0;
+        for (const value of marginalContributions.values()) {
+            sumMarginal += value;
+        }
+        sumMarginalEl.textContent = sumMarginal;
+    }
+
     // Render board
     function renderBoard(b) {
         boardRenderer.render(b);
@@ -111,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Shapley board (opacity-based visualization)
     function renderShapleyBoard(contributions) {
         shapleyRenderer.render(originalBoard, contributions);
+        updateVerification(contributions);
     }
 
     // Update info display
