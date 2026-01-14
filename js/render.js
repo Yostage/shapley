@@ -86,81 +86,95 @@ class BoardRenderer {
     }
 }
 
-class ChartRenderer {
+class ShapleyBoardRenderer {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
+        this.cellSize = 30;
+    }
+
+    // Parse hex color to RGB
+    hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 128, g: 128, b: 128 };
     }
 
     render(board, contributions) {
         const ctx = this.ctx;
-        const padding = { top: 30, right: 80, bottom: 20, left: 60 };
+        const cellSize = this.cellSize;
 
-        // Clear
+        // Clear canvas
         ctx.fillStyle = '#0f0f23';
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-        const pieceIds = board.getPieceIds();
-        if (pieceIds.length === 0) return;
+        // Draw grid lines
+        ctx.strokeStyle = '#2a2a4a';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= board.width; x++) {
+            ctx.beginPath();
+            ctx.moveTo(x * cellSize, 0);
+            ctx.lineTo(x * cellSize, board.height * cellSize);
+            ctx.stroke();
+        }
+        for (let y = 0; y <= board.height; y++) {
+            ctx.beginPath();
+            ctx.moveTo(0, y * cellSize);
+            ctx.lineTo(board.width * cellSize, y * cellSize);
+            ctx.stroke();
+        }
 
-        // Get max contribution for scaling
+        // Calculate max contribution for scaling opacity
+        const pieceIds = board.getPieceIds();
         let maxContrib = 0;
         for (const id of pieceIds) {
             const contrib = contributions.get(id) || 0;
             maxContrib = Math.max(maxContrib, Math.abs(contrib));
         }
-        maxContrib = Math.max(maxContrib, 1); // Avoid division by zero
+        maxContrib = Math.max(maxContrib, 0.1); // Avoid division by zero
 
-        const chartWidth = this.canvas.width - padding.left - padding.right;
-        const chartHeight = this.canvas.height - padding.top - padding.bottom;
-        const barHeight = Math.min(20, chartHeight / pieceIds.length - 2);
-        const barSpacing = chartHeight / pieceIds.length;
+        // Draw cells with opacity based on contribution
+        for (let y = 0; y < board.height; y++) {
+            for (let x = 0; x < board.width; x++) {
+                const cell = board.grid[y][x];
+                if (cell) {
+                    const displayY = (board.height - 1 - y) * cellSize;
+                    const displayX = x * cellSize;
 
-        // Draw axis
-        ctx.strokeStyle = '#555';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, padding.top);
-        ctx.lineTo(padding.left, this.canvas.height - padding.bottom);
-        ctx.stroke();
+                    // Get contribution for this piece
+                    const contrib = contributions.get(cell.pieceId) || 0;
+                    // Map contribution to opacity (0.15 to 1.0)
+                    const opacity = 0.15 + (contrib / maxContrib) * 0.85;
 
-        // Sort pieces by contribution for better visualization
-        const sortedPieces = [...pieceIds].sort((a, b) => {
-            return (contributions.get(b) || 0) - (contributions.get(a) || 0);
-        });
+                    // Parse color and apply opacity
+                    const rgb = this.hexToRgb(cell.color);
+                    ctx.fillStyle = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${opacity})`;
+                    ctx.fillRect(displayX + 1, displayY + 1, cellSize - 2, cellSize - 2);
 
-        // Draw bars
-        for (let i = 0; i < sortedPieces.length; i++) {
-            const pieceId = sortedPieces[i];
-            const piece = board.getPiece(pieceId);
-            const contrib = contributions.get(pieceId) || 0;
+                    // Add 3D effect with adjusted opacity
+                    ctx.fillStyle = `rgba(255,255,255,${0.2 * opacity})`;
+                    ctx.fillRect(displayX + 1, displayY + 1, cellSize - 2, 3);
+                    ctx.fillRect(displayX + 1, displayY + 1, 3, cellSize - 2);
 
-            const y = padding.top + i * barSpacing + (barSpacing - barHeight) / 2;
-            const barWidth = (contrib / maxContrib) * chartWidth;
+                    ctx.fillStyle = `rgba(0,0,0,${0.2 * opacity})`;
+                    ctx.fillRect(displayX + 1, displayY + cellSize - 4, cellSize - 2, 3);
+                    ctx.fillRect(displayX + cellSize - 4, displayY + 1, 3, cellSize - 2);
 
-            // Draw bar
-            ctx.fillStyle = piece ? piece.color : '#888';
-            ctx.fillRect(padding.left, y, Math.max(barWidth, 2), barHeight);
-
-            // Draw piece ID label
-            ctx.fillStyle = '#aaa';
-            ctx.font = '11px sans-serif';
-            ctx.textAlign = 'right';
-            ctx.fillText(`#${pieceId}`, padding.left - 5, y + barHeight / 2 + 4);
-
-            // Draw value label
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'left';
-            ctx.fillText(contrib.toFixed(2), padding.left + barWidth + 5, y + barHeight / 2 + 4);
+                    // Show contribution value on hover-sized pieces
+                    if (contrib > 0) {
+                        ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+                        ctx.font = '9px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.fillText(contrib.toFixed(1), displayX + cellSize/2, displayY + cellSize/2 + 3);
+                    }
+                }
+            }
         }
-
-        // Title
-        ctx.fillStyle = '#aaa';
-        ctx.font = '12px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('Average contribution to height', this.canvas.width / 2, 15);
     }
 }
 
 window.BoardRenderer = BoardRenderer;
-window.ChartRenderer = ChartRenderer;
+window.ShapleyBoardRenderer = ShapleyBoardRenderer;

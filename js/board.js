@@ -231,6 +231,22 @@ class Board {
         }
         return count;
     }
+
+    // Calculate marginal contribution of each piece if removed alone
+    calculateMarginalContributions() {
+        const contributions = new Map();
+        const heightBefore = this.getHeight();
+
+        for (const pieceId of this.getPieceIds()) {
+            const testBoard = this.clone();
+            testBoard.removePiece(pieceId);
+            testBoard.applyGravity();
+            const heightAfter = testBoard.getHeight();
+            contributions.set(pieceId, heightBefore - heightAfter);
+        }
+
+        return contributions;
+    }
 }
 
 // Export for use in other modules
