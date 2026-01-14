@@ -37,6 +37,7 @@
         <main class="visualization">
             <section class="panel">
                 <h2>Simulation</h2>
+                <p class="algo-desc">&nbsp;</p>
                 <p class="sum-display">Height: <span id="board-height">0</span> | Iter: <span id="current-iteration">0</span>/<span id="total-iterations">0</span></p>
                 <div class="board-container">
                     <canvas id="board-canvas" width="300" height="600"></canvas>
@@ -53,7 +54,7 @@
             </section>
 
             <section class="panel">
-                <h2 class="algo-title" title="Each piece's height impact if removed alone from the full board. Removing any highlighted piece guarantees that exact height reduction. May miss pieces that only matter after others are removed.">Marginal</h2>
+                <h2 class="algo-title" title="Each piece's height impact if removed alone from the full board. Removing any highlighted piece guarantees that exact height reduction. May miss pieces that only matter after others are removed.">Counterfactual</h2>
                 <p class="algo-desc">Guaranteed impact, may miss opportunities</p>
                 <p class="sum-display">Σ = <span id="sum-marginal">0</span></p>
                 <div class="board-container">
@@ -62,7 +63,7 @@
             </section>
 
             <section class="panel">
-                <h2 class="algo-title" title="The vertical chain of pieces from top to bottom that determines height. Every piece on this path matters, but removing one only gets you its portion of the total. The sum always equals total height.">Critical Path</h2>
+                <h2 class="algo-title" title="The vertical chain of pieces from top to bottom that determines height. Every piece on this path matters, but improving one by itself does not guarantee any impact. The sum always equals total height.">Critical Path</h2>
                 <p class="algo-desc">Definitely relevant, fractional wins</p>
                 <p class="sum-display">Σ = <span id="sum-critical">0</span></p>
                 <div class="board-container">
