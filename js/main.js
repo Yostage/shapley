@@ -20,15 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const boardHeightEl = document.getElementById('board-height');
     const sumShapleyEl = document.getElementById('sum-shapley');
     const sumMarginalEl = document.getElementById('sum-marginal');
+    const sumCriticalEl = document.getElementById('sum-critical');
 
     const boardCanvas = document.getElementById('board-canvas');
     const shapleyCanvas = document.getElementById('shapley-canvas');
     const marginalCanvas = document.getElementById('marginal-canvas');
+    const criticalCanvas = document.getElementById('critical-canvas');
 
     // Renderers
     const boardRenderer = new BoardRenderer(boardCanvas);
     const shapleyRenderer = new ShapleyBoardRenderer(shapleyCanvas);
     const marginalRenderer = new ShapleyBoardRenderer(marginalCanvas);
+    const criticalRenderer = new ShapleyBoardRenderer(criticalCanvas);
 
     // State
     let board = null;
@@ -37,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let stepGenerator = null;
     let isRunning = false;
     let marginalContributions = new Map();
+    let criticalContributions = new Map();
 
     // URL state management
     function loadFromURL() {
@@ -109,10 +113,14 @@ document.addEventListener('DOMContentLoaded', () => {
         shapleyCanvas.height = canvasHeight;
         marginalCanvas.width = canvasWidth;
         marginalCanvas.height = canvasHeight;
+        criticalCanvas.width = canvasWidth;
+        criticalCanvas.height = canvasHeight;
 
         // Calculate marginal contributions (static, once per board)
         marginalContributions = originalBoard.calculateMarginalContributions();
-        console.log('Marginal contributions:', Object.fromEntries(marginalContributions));
+
+        // Calculate critical path contributions (static, once per board)
+        criticalContributions = originalBoard.calculateCriticalPath();
 
         // Create simulation with seed offset for different random ordering
         simulation = new ShapleySimulation(originalBoard, seed + 1000);
@@ -123,11 +131,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderBoard(board);
         renderShapleyBoard(new Map());
         renderMarginalBoard();
+        renderCriticalBoard();
     }
 
     // Render marginal board (static, calculated once)
     function renderMarginalBoard() {
         marginalRenderer.render(originalBoard, marginalContributions);
+    }
+
+    // Render critical path board (static, calculated once)
+    function renderCriticalBoard() {
+        criticalRenderer.render(originalBoard, criticalContributions);
+        // Update critical sum
+        let sumCritical = 0;
+        for (const value of criticalContributions.values()) {
+            sumCritical += value;
+        }
+        sumCriticalEl.textContent = sumCritical;
     }
 
     // Update verification display

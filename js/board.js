@@ -263,6 +263,52 @@ class Board {
 
         return contributions;
     }
+
+    // Calculate critical path - trace row by row from top to bottom
+    // Each row gives +1 credit to the piece occupying that position
+    calculateCriticalPath() {
+        const contributions = new Map();
+        for (const id of this.getPieceIds()) {
+            contributions.set(id, 0);
+        }
+
+        const height = this.getHeight();
+        if (height === 0) return contributions;
+
+        // Find starting position (leftmost cell at highest row)
+        const maxY = height - 1;
+        let currentX = 0;
+        for (let x = 0; x < this.width; x++) {
+            if (this.grid[maxY][x]) {
+                currentX = x;
+                break;
+            }
+        }
+
+        // Trace down row by row from top to bottom
+        for (let y = maxY; y >= 0; y--) {
+            let cell = this.grid[y][currentX];
+
+            // If no cell at currentX, find the leftmost cell in this row
+            if (!cell) {
+                for (let x = 0; x < this.width; x++) {
+                    if (this.grid[y][x]) {
+                        currentX = x;
+                        cell = this.grid[y][x];
+                        break;
+                    }
+                }
+            }
+
+            if (cell) {
+                // Credit this row to the piece
+                const current = contributions.get(cell.pieceId) || 0;
+                contributions.set(cell.pieceId, current + 1);
+            }
+        }
+
+        return contributions;
+    }
 }
 
 // Export for use in other modules
