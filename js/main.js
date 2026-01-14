@@ -14,10 +14,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedSlider = document.getElementById('speed');
     const speedValue = document.getElementById('speed-value');
 
-    const currentHeightEl = document.getElementById('current-height');
     const currentIterationEl = document.getElementById('current-iteration');
     const totalIterationsEl = document.getElementById('total-iterations');
-    const currentPieceEl = document.getElementById('current-piece');
 
     const boardHeightEl = document.getElementById('board-height');
     const sumShapleyEl = document.getElementById('sum-shapley');
@@ -168,13 +166,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update info display
     function updateDisplay(stepData = null) {
         if (stepData) {
-            currentHeightEl.textContent = stepData.heightAfter !== undefined ? stepData.heightAfter : stepData.height;
             currentIterationEl.textContent = stepData.iteration;
-            currentPieceEl.textContent = stepData.pieceId !== undefined ? `#${stepData.pieceId}` : '-';
-        } else if (board) {
-            currentHeightEl.textContent = board.getHeight();
-            currentIterationEl.textContent = simulation ? simulation.getTotalIterations() : 0;
-            currentPieceEl.textContent = '-';
+        } else if (simulation) {
+            currentIterationEl.textContent = simulation.getTotalIterations();
+        } else {
+            currentIterationEl.textContent = 0;
         }
         totalIterationsEl.textContent = iterationsSlider.value;
     }

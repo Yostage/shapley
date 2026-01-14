@@ -131,33 +131,21 @@ h2 {
     display: inline-block;
 }
 
-#board-canvas {
+#board-canvas,
+#shapley-canvas,
+#marginal-canvas {
     display: block;
 }
 
-.simulation-info,
-.verification-info {
-    margin-top: 15px;
+.sum-display {
     font-size: 14px;
     color: #aaa;
+    margin-bottom: 10px;
+    height: 20px;
+    line-height: 20px;
 }
 
-.simulation-info p,
-.verification-info p {
-    margin: 5px 0;
-}
-
-.simulation-info span,
-.verification-info span {
+.sum-display span {
     color: #fff;
     font-weight: bold;
-}
-
-.verification-info {
-    border-top: 1px solid #333;
-    padding-top: 10px;
-}
-
-#shapley-canvas {
-    display: block;
 }

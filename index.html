@@ -37,23 +37,15 @@
         <main class="visualization">
             <section class="left-panel">
                 <h2>Simulation</h2>
+                <p class="sum-display">Height: <span id="board-height">0</span> | Iter: <span id="current-iteration">0</span>/<span id="total-iterations">0</span></p>
                 <div class="board-container">
                     <canvas id="board-canvas" width="300" height="600"></canvas>
-                </div>
-                <div class="simulation-info">
-                    <p>Height: <span id="current-height">0</span></p>
-                    <p>Iteration: <span id="current-iteration">0</span> / <span id="total-iterations">0</span></p>
-                    <p>Current Piece: <span id="current-piece">-</span></p>
-                </div>
-                <div class="verification-info">
-                    <p>Board Height: <span id="board-height">0</span></p>
-                    <p>Σ Shapley: <span id="sum-shapley">0</span></p>
-                    <p>Σ Marginal: <span id="sum-marginal">0</span></p>
                 </div>
             </section>
 
             <section class="middle-panel">
                 <h2>Shapley Values (Average)</h2>
+                <p class="sum-display">Σ = <span id="sum-shapley">0</span></p>
                 <div class="board-container">
                     <canvas id="shapley-canvas" width="300" height="600"></canvas>
                 </div>
@@ -61,6 +53,7 @@
 
             <section class="right-panel">
                 <h2>Marginal (Solo Removal)</h2>
+                <p class="sum-display">Σ = <span id="sum-marginal">0</span></p>
                 <div class="board-container">
                     <canvas id="marginal-canvas" width="300" height="600"></canvas>
                 </div>
