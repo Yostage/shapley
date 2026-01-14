@@ -198,7 +198,23 @@ class Board {
         const rand = mulberry32(seed);
         const board = new Board(width, 20);
 
-        // Try to fill the board from bottom up
+        // Place a full-width yellow base block in bottom 2 rows
+        const basePieceId = board.nextPieceId++;
+        const baseColor = '#f0f000'; // Yellow like O piece
+        const baseCells = [];
+        for (let y = 0; y < 2; y++) {
+            for (let x = 0; x < width; x++) {
+                board.grid[y][x] = { pieceId: basePieceId, color: baseColor };
+                baseCells.push({ x, y });
+            }
+        }
+        board.pieces.set(basePieceId, {
+            type: 'BASE',
+            color: baseColor,
+            cells: baseCells
+        });
+
+        // Generate other pieces only above the base (y >= 2)
         let attempts = 0;
         const maxAttempts = 1000;
         const targetCells = Math.floor(board.width * board.height * fillRatio);
@@ -209,14 +225,14 @@ class Board {
             // Pick a random piece type
             const type = PIECE_TYPES[Math.floor(rand() * PIECE_TYPES.length)];
 
-            // Try to place it at a random position
+            // Try to place it at a random position, but only y >= 2
             const x = Math.floor(rand() * (board.width - 3));
-            const y = Math.floor(rand() * (board.height - 2));
+            const y = 2 + Math.floor(rand() * (board.height - 4));
 
             board.placePiece(type, x, y);
         }
 
-        // Apply gravity to settle pieces
+        // Apply gravity to settle pieces (they'll rest on the base)
         board.applyGravity();
 
         return board;
