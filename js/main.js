@@ -21,17 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const sumShapleyEl = document.getElementById('sum-shapley');
     const sumMarginalEl = document.getElementById('sum-marginal');
     const sumCriticalEl = document.getElementById('sum-critical');
+    const sumUniformEl = document.getElementById('sum-uniform');
 
     const boardCanvas = document.getElementById('board-canvas');
     const shapleyCanvas = document.getElementById('shapley-canvas');
     const marginalCanvas = document.getElementById('marginal-canvas');
     const criticalCanvas = document.getElementById('critical-canvas');
+    const uniformCanvas = document.getElementById('uniform-canvas');
 
     // Renderers
     const boardRenderer = new BoardRenderer(boardCanvas);
     const shapleyRenderer = new ShapleyBoardRenderer(shapleyCanvas);
     const marginalRenderer = new ShapleyBoardRenderer(marginalCanvas);
     const criticalRenderer = new ShapleyBoardRenderer(criticalCanvas);
+    const uniformRenderer = new ShapleyBoardRenderer(uniformCanvas);
 
     // State
     let board = null;
@@ -41,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRunning = false;
     let marginalContributions = new Map();
     let criticalContributions = new Map();
+    let uniformContributions = new Map();
 
     // URL state management
     function loadFromURL() {
@@ -116,18 +120,24 @@ document.addEventListener('DOMContentLoaded', () => {
         marginalCanvas.height = canvasHeight;
         criticalCanvas.width = canvasWidth;
         criticalCanvas.height = canvasHeight;
+        uniformCanvas.width = canvasWidth;
+        uniformCanvas.height = canvasHeight;
 
         // Update renderer cell sizes
         boardRenderer.cellSize = cellSize;
         shapleyRenderer.cellSize = cellSize;
         marginalRenderer.cellSize = cellSize;
         criticalRenderer.cellSize = cellSize;
+        uniformRenderer.cellSize = cellSize;
 
         // Calculate marginal contributions (static, once per board)
         marginalContributions = originalBoard.calculateMarginalContributions();
 
         // Calculate critical path contributions (static, once per board)
         criticalContributions = originalBoard.calculateCriticalPath();
+
+        // Calculate uniform contributions (static, once per board)
+        uniformContributions = originalBoard.calculateUniformContributions();
 
         // Create simulation with seed offset for different random ordering
         simulation = new ShapleySimulation(originalBoard, seed + 1000);
@@ -139,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderShapleyBoard(new Map());
         renderMarginalBoard();
         renderCriticalBoard();
+        renderUniformBoard();
     }
 
     // Render marginal board (static, calculated once)
@@ -155,6 +166,16 @@ document.addEventListener('DOMContentLoaded', () => {
             sumCritical += value;
         }
         sumCriticalEl.textContent = sumCritical;
+    }
+
+    // Render uniform board (static, calculated once)
+    function renderUniformBoard() {
+        uniformRenderer.render(originalBoard, uniformContributions);
+        let sumUniform = 0;
+        for (const value of uniformContributions.values()) {
+            sumUniform += value;
+        }
+        sumUniformEl.textContent = sumUniform.toFixed(2);
     }
 
     // Update verification display

@@ -12,7 +12,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -129,7 +129,8 @@ h2 {
 #board-canvas,
 #shapley-canvas,
 #marginal-canvas,
-#critical-canvas {
+#critical-canvas,
+#uniform-canvas {
     display: block;
 }
 

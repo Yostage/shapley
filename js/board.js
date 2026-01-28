@@ -334,6 +334,30 @@ class Board {
 
         return contributions;
     }
+
+    // Calculate uniform contributions - distribute 1 unit of blame equally
+    // among all distinct pieces present in each row
+    calculateUniformContributions() {
+        const contributions = new Map();
+        for (const id of this.getPieceIds()) {
+            contributions.set(id, 0);
+        }
+
+        const height = this.getHeight();
+        for (let y = 0; y < height; y++) {
+            const piecesInRow = new Set();
+            for (let x = 0; x < this.width; x++) {
+                const cell = this.grid[y][x];
+                if (cell) piecesInRow.add(cell.pieceId);
+            }
+            const share = 1 / piecesInRow.size;
+            for (const pieceId of piecesInRow) {
+                contributions.set(pieceId, contributions.get(pieceId) + share);
+            }
+        }
+
+        return contributions;
+    }
 }
 
 // Export for use in other modules
