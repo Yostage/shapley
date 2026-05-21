@@ -1,3 +1,16 @@
+// Theme colors (Meta light theme)
+const THEME = {
+    canvasBg: '#ffffff',
+    gridLine: '#e4e6eb',
+    pieceBorder: '#ffffff',
+    highlight: '#1c1e21',
+    labelFill: '#1c1e21',
+    labelStroke: '#ffffff',
+    baseLabelFill: '#1c1e21',
+    baseLabelStroke: '#ffffff',
+    heightIndicator: '#E6193B'
+};
+
 class BoardRenderer {
     constructor(canvas) {
         this.canvas = canvas;
@@ -11,11 +24,11 @@ class BoardRenderer {
         const cellSize = this.cellSize;
 
         // Clear canvas
-        ctx.fillStyle = '#0f0f23';
+        ctx.fillStyle = THEME.canvasBg;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw grid lines (background)
-        ctx.strokeStyle = '#2a2a4a';
+        ctx.strokeStyle = THEME.gridLine;
         ctx.lineWidth = 1;
         for (let x = 0; x <= board.width; x++) {
             ctx.beginPath();
@@ -50,7 +63,7 @@ class BoardRenderer {
                     ctx.fillRect(displayX, displayY, cellSize, cellSize);
 
                     // Draw borders only on edges not adjacent to same piece
-                    ctx.strokeStyle = '#0f0f23';
+                    ctx.strokeStyle = THEME.pieceBorder;
                     ctx.lineWidth = 2;
 
                     // Top edge (check y+1 in grid = above in display)
@@ -84,7 +97,7 @@ class BoardRenderer {
 
                     // Highlight if this is the highlighted piece
                     if (cell.pieceId === this.highlightedPiece) {
-                        ctx.strokeStyle = '#fff';
+                        ctx.strokeStyle = THEME.highlight;
                         ctx.lineWidth = 3;
                         ctx.strokeRect(displayX + 2, displayY + 2, cellSize - 4, cellSize - 4);
                     }
@@ -92,29 +105,11 @@ class BoardRenderer {
             }
         }
 
-        // Draw "TD" label on base block (left-justified)
-        const labelFontSize = Math.max(10, Math.floor(cellSize * 0.53));
-        for (const [pieceId, piece] of board.pieces) {
-            if (piece.type === 'BASE') {
-                const leftX = Math.floor(cellSize * 0.27);
-                const centerY = (board.height - 1) * cellSize;  // Row 0-1 from bottom
-                ctx.font = `bold ${labelFontSize}px sans-serif`;
-                ctx.textAlign = 'left';
-                ctx.textBaseline = 'middle';
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
-                ctx.strokeText('TD', leftX, centerY);
-                ctx.fillStyle = '#fff';
-                ctx.fillText('TD', leftX, centerY);
-                break;
-            }
-        }
-
         // Draw height indicator
         const height = board.getHeight();
         if (height > 0) {
             const indicatorY = (board.height - height) * cellSize;
-            ctx.strokeStyle = '#ff6b6b';
+            ctx.strokeStyle = THEME.heightIndicator;
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
@@ -125,7 +120,7 @@ class BoardRenderer {
 
             // Height label
             const heightFontSize = Math.max(9, Math.floor(cellSize * 0.4));
-            ctx.fillStyle = '#ff6b6b';
+            ctx.fillStyle = THEME.heightIndicator;
             ctx.font = `${heightFontSize}px sans-serif`;
             ctx.fillText(`h=${height}`, board.width * cellSize + 5, indicatorY + 4);
         }
@@ -158,11 +153,11 @@ class ShapleyBoardRenderer {
         const cellSize = this.cellSize;
 
         // Clear canvas
-        ctx.fillStyle = '#0f0f23';
+        ctx.fillStyle = THEME.canvasBg;
         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         // Draw grid lines (background)
-        ctx.strokeStyle = '#2a2a4a';
+        ctx.strokeStyle = THEME.gridLine;
         ctx.lineWidth = 1;
         for (let x = 0; x <= board.width; x++) {
             ctx.beginPath();
@@ -224,7 +219,7 @@ class ShapleyBoardRenderer {
                     ctx.fillRect(displayX, displayY, cellSize, cellSize);
 
                     // Draw borders only on edges not adjacent to same piece
-                    ctx.strokeStyle = '#0f0f23';
+                    ctx.strokeStyle = THEME.pieceBorder;
                     ctx.lineWidth = 2;
 
                     // Top edge
@@ -260,46 +255,22 @@ class ShapleyBoardRenderer {
         }
 
         // Draw contribution labels at piece centers
-        const labelFontSize = Math.max(10, Math.floor(cellSize * 0.53));
         const contribFontSize = Math.max(8, Math.floor(cellSize * 0.37));
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         for (const [pieceId, center] of pieceCenters) {
             const piece = board.pieces.get(pieceId);
+            if (piece && piece.type === 'BASE') continue;
             const contrib = contributions.get(pieceId) || 0;
+            if (contrib <= 0) continue;
             const x = center.sumX / center.count;
             const y = center.sumY / center.count;
-
-            // Special label for base block (TD left-justified, contribution centered)
-            if (piece && piece.type === 'BASE') {
-                const opacity = 0.15 + (contrib / maxContrib) * 0.85;
-                // Draw TD on the left
-                ctx.font = `bold ${labelFontSize}px sans-serif`;
-                ctx.textAlign = 'left';
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
-                ctx.strokeText('TD', Math.floor(cellSize * 0.27), y);
-                ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-                ctx.fillText('TD', Math.floor(cellSize * 0.27), y);
-                // Draw contribution in center if > 0
-                if (contrib > 0) {
-                    ctx.font = `bold ${contribFontSize}px sans-serif`;
-                    ctx.textAlign = 'center';
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 3;
-                    ctx.strokeText(contrib.toFixed(1), x, y);
-                    ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-                    ctx.fillText(contrib.toFixed(1), x, y);
-                }
-            } else if (contrib > 0) {
-                const opacity = 0.15 + (contrib / maxContrib) * 0.85;
-                ctx.font = `bold ${contribFontSize}px sans-serif`;
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 3;
-                ctx.strokeText(contrib.toFixed(1), x, y);
-                ctx.fillStyle = `rgba(255,255,255,${opacity})`;
-                ctx.fillText(contrib.toFixed(1), x, y);
-            }
+            ctx.font = `bold ${contribFontSize}px sans-serif`;
+            ctx.strokeStyle = THEME.labelStroke;
+            ctx.lineWidth = 3;
+            ctx.strokeText(contrib.toFixed(1), x, y);
+            ctx.fillStyle = THEME.labelFill;
+            ctx.fillText(contrib.toFixed(1), x, y);
         }
     }
 }

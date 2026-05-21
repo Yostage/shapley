@@ -8,15 +8,15 @@ function mulberry32(seed) {
     };
 }
 
-// Tetris piece definitions (relative coordinates)
+// Meta-theme piece colors (from ITERATION_COLORS palette)
 const PIECE_SHAPES = {
-    I: { cells: [[0,0], [1,0], [2,0], [3,0]], color: '#00f0f0' },  // Cyan
-    O: { cells: [[0,0], [1,0], [0,1], [1,1]], color: '#f0f000' },  // Yellow
-    T: { cells: [[0,0], [1,0], [2,0], [1,1]], color: '#a000f0' },  // Purple
-    S: { cells: [[1,0], [2,0], [0,1], [1,1]], color: '#00f000' },  // Green
-    Z: { cells: [[0,0], [1,0], [1,1], [2,1]], color: '#f00000' },  // Red
-    J: { cells: [[0,0], [0,1], [1,1], [2,1]], color: '#0000f0' },  // Blue
-    L: { cells: [[2,0], [0,1], [1,1], [2,1]], color: '#f0a000' }   // Orange
+    I: { cells: [[0,0], [1,0], [2,0], [3,0]], color: '#FA7DC8' },  // Pink
+    O: { cells: [[0,0], [1,0], [0,1], [1,1]], color: '#F0AA19' },  // Yellow
+    T: { cells: [[0,0], [1,0], [2,0], [1,1]], color: '#8773FF' },  // Purple
+    S: { cells: [[1,0], [2,0], [0,1], [1,1]], color: '#13BE19' },  // Green
+    Z: { cells: [[0,0], [1,0], [1,1], [2,1]], color: '#E6193B' },  // Red
+    J: { cells: [[0,0], [0,1], [1,1], [2,1]], color: '#00C8F0' },  // Light blue
+    L: { cells: [[2,0], [0,1], [1,1], [2,1]], color: '#FA8719' }   // Orange
 };
 
 const PIECE_TYPES = Object.keys(PIECE_SHAPES);
@@ -220,15 +220,13 @@ class Board {
         const rand = mulberry32(seed);
         const board = new Board(width, 20);
 
-        // Place a full-width yellow base block in bottom 2 rows
+        // Place a full-width base block in the bottom row
         const basePieceId = board.nextPieceId++;
-        const baseColor = '#f0f000'; // Yellow like O piece
+        const baseColor = '#00D2BE'; // Teal (from ITERATION_COLORS)
         const baseCells = [];
-        for (let y = 0; y < 2; y++) {
-            for (let x = 0; x < width; x++) {
-                board.grid[y][x] = { pieceId: basePieceId, color: baseColor };
-                baseCells.push({ x, y });
-            }
+        for (let x = 0; x < width; x++) {
+            board.grid[0][x] = { pieceId: basePieceId, color: baseColor };
+            baseCells.push({ x, y: 0 });
         }
         board.pieces.set(basePieceId, {
             type: 'BASE',
@@ -236,7 +234,7 @@ class Board {
             cells: baseCells
         });
 
-        // Generate other pieces only above the base (y >= 2)
+        // Generate other pieces only above the base (y >= 1)
         let attempts = 0;
         const maxAttempts = 1000;
         const targetCells = Math.floor(board.width * board.height * fillRatio);
@@ -250,9 +248,9 @@ class Board {
             // Pick a random rotation (0, 1, 2, or 3 = 0°, 90°, 180°, 270°)
             const rotation = Math.floor(rand() * 4);
 
-            // Try to place it at a random position, but only y >= 2
+            // Try to place it at a random position, but only y >= 1
             const x = Math.floor(rand() * (board.width - 3));
-            const y = 2 + Math.floor(rand() * (board.height - 4));
+            const y = 1 + Math.floor(rand() * (board.height - 3));
 
             board.placePiece(type, x, y, rotation);
         }
